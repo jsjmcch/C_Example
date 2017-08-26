@@ -1,4 +1,4 @@
-* 프로그램 명: calfflac
+프로그램 명: calfflac
 
 문장 속에 포함된 가장 큰 palindrome 을 찾는 문제이다.
 문장속에 포함된 A-Z 과 a-z 만을 고려하고 대소문자는 고려하지 않는다.
@@ -321,21 +321,575 @@ int main(int argc, char* argv[])
 }
 
 =======================================================================================
+Exercise 문제 #2 - Log Parsing
+이번 연습 문제에서는 access.log 파일을 파싱하여 URL 호출 성공 횟수와 이미지 파일 호출 횟수를 세는 프로그램을 작성한다.
+
+ 
+
+
+<요구사항>
+1. access.log 파일을 읽어 들여 문자열을 파싱한다.
+2. HTTP 상태 값이 200(성공)인 라인의 수를 센다.
+3. 이미지 파일이 호출된 라인 수를 센다. (HTTP 상태와는 상관 없음)
+ 그림 파일은 대소문자 구분 없이 jpg, gif, png 확장자로 끝난다. 단, 디렉토리가 /png/와 같이 포함된 경우도 있다.
+4. access.log 파일은 아래와 같은 형태로 구성되어 있다.
+
+* answer #1 
+ 
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+int main(void)
+{
+    int i,j;
+    char buf[200] = {0,};
+    char *ptr;
+    int count1 = 0, count2 = 0;
+    char acSrh1[2][20] = {"HTTP/1.1\" 200","HTTP/1.0\" 200"};
+    char acSrh2[6][10] = {".jpg",".JPG", ".gif", ".GIF", ".png",".PNG"};
+
+    FILE *fp = NULL;
+
+    fp = fopen("access.log", "r");
+    if( fp == NULL ) {
+        printf("fp is NULL\n");
+        return -1;
+    }
+
+    while( !feof(fp) ) {
+        fgets(buf, sizeof(buf), fp);
+        for(i=0; i<sizeof(acSrh1)/sizeof(acSrh1[0]); i++) {
+            ptr = strstr(buf,acSrh1[i]);
+            if (ptr != NULL) {
+                count1++;
+                break;
+            }
+        }
+        for(i=0; i<sizeof(acSrh2)/sizeof(acSrh2[0]); i++) {
+            ptr = strstr(buf,acSrh2[i]);
+            if (ptr != NULL) {
+                count2++;
+                break;
+            }
+        }
+    }
+
+    printf("Result Status 200 count is %d\n", count1);
+    printf("Image file count is %d\n", count2);
+
+    fclose(fp);
+
+    return 0;
+}
 
 =======================================================================================
+수식이 주어질 때 같은 짝의 괄호의 위치를 찾는 문제이다. stack을 활용하여 문제를 풀어주세요.
+(a*(b+c)+d) 
 
+이 경우에는 3 과 7 , 0 과 10 이 한 쌍의 괄호이다. 
+
+입력 
+입력은 공백없이 입력된다. 입력되는 문자는 소문자,소괄호,(+,-,*,/)이다. 
+문자열의 길이는 최대 50 까지이다. 
+
+출력 
+왼쪽에서 오른쪽을 가면서 먼저 짝이 맞는 (여는 괄호 위치, 닫는 괄호 위치) 순으로 출력하고, 짝이 맞지 않는 수식은 not match 를 출력한다. 
+
+입 출력 예
+입력
+(a*(b+c)+d)
+출력
+3 7
+0 10
+
+* answer #1
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+#define MAX_SIZE 30
+
+typedef struct _susik {
+    int buf[MAX_SIZE];
+    int top;
+} susik;
+
+susik sk;
+
+bool is_empty() {
+    if (sk.top == -1) return true;
+    else return false;
+}
+
+bool is_full() {
+    if (sk.top >= MAX_SIZE - 1) return true;
+    else return false;
+}
+
+bool push(int num) {
+    if(is_full()) {
+        printf("stack is full!\n");
+        return false;
+    }
+    else {
+        sk.top++;
+        sk.buf[sk.top] = num;
+        return true;
+    }
+}
+
+int pop() {
+    int num;
+    if(is_empty()) {
+        printf("stack is empty!\n");
+        return false;
+    }
+
+    num = sk.buf[sk.top];
+    sk.top = sk.top - 1;
+
+    return num;
+}
+
+int main(void) {
+    int i,j;
+    char array[50];
+    int num;
+
+    sk.top = -1;
+    memset(sk.buf, 0x0, sizeof(sk.buf));
+
+    printf("insert susik :\n");
+    fgets(array, sizeof(array), stdin);
+
+    //printf("array = %s\n", array);
+
+    for(i=0; i<strlen(array); i++) {
+        if (array[i] == '(')
+            push(i);
+        else if (array[i] == ')') {
+            num = pop();
+            printf(" %d %d\n", num, i);
+        }
+    }
+
+    if (is_empty() != true) {
+        printf("it's not match.\n");
+    }
+
+    return 0;
+}
 =======================================================================================
+공백을 기준으로 단어 별 역순으로 출력하는 프로그램을 작성하시오. 
 
+입력
+입력되는 수의 첫 수는 공백이 아니고 각 단어 사이에는 공백이 하나씩만 존재 한다. 
+한 줄에 최대 80 자까지 입력될 수 있고 , 단어는 하나 이상이다. 
+
+출력
+단어별 역순으로 출력한 값을 공백 하나를 사이에 두고 출력한다. 
+
+입출력 예
+입력
+I like spring.
+출력
+I ekil .gnirps 
+
+* answer #1
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+char cache[80];
+int cache_size = 0;
+
+static void cache_put(char c)
+{
+        cache[cache_size++] = c;
+}
+
+static void cache_flush()
+{
+        if (cache_size > 0)
+        {
+                int i;
+                for (i = cache_size - 1; i >= 0; i--)
+                        printf("%c", cache[i]);
+                printf(" ");
+                cache_size = 0;
+        }
+}
+
+int main(void)
+{
+        char buf[81];
+        char* p;
+
+        while ((p = fgets(buf, sizeof(buf), stdin)) != NULL)
+        {
+                while (*p)
+                {
+                        if (isspace(*p))
+                                cache_flush();
+                        else
+                                cache_put(*p);
+                        p++;
+                }
+                cache_flush();
+                printf("\n");
+        }
+        return 0;
+}
+
+* answer #2
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+int main(int argc, char * argv[] ) {
+    char* buf[81];
+    memset(buf, 0x00, 81);
+
+    if(argc < 2 || argc > 81) {
+        printf("argc error\n");
+        return -1;
+    }
+
+    for(int i=1;i<argc;i++) {
+        buf[i-1]= argv[i];
+
+        int strlength = strlen(buf[i-1]);
+        for(int j=strlength-1;j>=0;j--) {
+            printf("%c", buf[i-1][j]);
+        }
+        printf(" ");
+    }
+    printf("\n");
+    return EXIT_SUCCESS;
+}
+
+* answer #3
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+
+int main(int argc, char *argv[]) {
+    int i,j,k,len;
+    char *ptr = NULL;
+    char *array[80] = {NULL, };
+
+    if (argc < 2 || argc > 81) {
+        printf("argc error\n");
+        return -1;
+    }
+
+    strcpy(buf, argv[1]);
+
+    ptr = strtok(buf, " ");
+    i = 0;
+    while( ptr != NULL) {
+        array[i] = (char *) malloc(sizeof(char)*50);
+        strcpy(array[i], ptr);
+        ptr = strtok(NULL, " ");
+        i++;
+    }
+
+    for(j=0; j<i; j++) {
+        len = strlen(array[j]);
+        for(k=len; k>=0; k--) {
+            printf("%c", array[j][k]);
+        }
+        printf(" ");
+    }
+
+    for(j=0; j<i; j++) {
+        free(array[j]);
+    }
+
+    return 0;
+}
 =======================================================================================
+10 진수를 입력으로 받아 이 수를 해당 진법으로 변환하는 프로그램를 작성하시오. 
 
+입력
+첫 수는 10 진수 d , 두 번째 수는 바꿀 진법 r 이다. d 는 10000 이하의 자연수이고 , r 은 2 이상 24 이하의 자연수이다. 
+수는 0 , 1 , 2 , ... , 9 , A , B , C .... 
+
+출력
+공백없이 한줄에 출력한다. 
+
+입출력 예
+입력
+32 16 
+
+출력
+20
+
+* answer #1
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+int main(void) {
+        int i,j;
+        int digit,jinbub;
+        div_t divresult;
+        char buf[30] = {0,};
+
+        printf("insert two values :\n");
+        scanf("%d %d", &digit, &jinbub);
+
+        // validation check
+        if ( digit > 10000) {
+                printf("insert digit(d<=10000), please\n");
+                return -1;
+        }
+        if ( jinbub < 2 || jinbub > 24) {
+                printf("insert digit( 2 <= r && r <= 24), please\n");
+                return -1;
+        }
+
+        i = 0;
+        while ( digit > 0 ) {
+                divresult = div(digit,jinbub);
+                buf[i] = divresult.rem + '0';
+                if (buf[i] > '9') buf[i] = buf[i] + 7;
+                digit = divresult.quot;
+                i++;
+        }
+
+        printf("output \n");
+        for(j=i-1; j>=0; j--) {
+                printf("%c", buf[j]);
+        }
+
+        return 0;
+}
+
+* answer #2
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(int argc, char * argv[] ) {
+    char buf[200] = {0,};
+
+    if(argc < 3 || argc > 4) {
+        printf("argc error\n");
+        return -1;
+    }
+    int input = atoi(argv[1]);
+    if(input < 0 || input > 10000) {
+        printf("argu1 error\n");
+        return -1;
+    }
+
+    int rad = atoi(argv[2]);
+    if(rad < 2 || rad > 24) {
+        printf("rad error\n");
+        return -1;
+    }
+
+    int num = input;
+    int pos = 0;
+
+    while(1) {
+        int a = num / rad;
+        int b = num % rad;
+
+        if(b < 10) {
+            buf[pos] = '0'+b;
+        }
+        else {
+            buf[pos] = 'A'+b-10;
+        }
+
+        if(a != 0) {
+            num = a;
+            pos++;
+        }
+        else
+            break;
+    }
+
+    for(int i=pos;i>=0;i--) {
+        printf("%c", buf[i]);
+    }
+    printf("\n");
+    return EXIT_SUCCESS;
+}
 =======================================================================================
+0 과 1 사이의 분수가 입력으로 주어질 때 소수이하 k 자리까지 출력하는 문제이다.
 
+입력
+세 수가 입력으로 주어진다.
+차례대로 분자, 분모 ,표현할 소수이하 자리 k 이다. 세수 모두 1000 이하의 자연수이다.
+
+출력
+출력 예의 형식으로 출력한다.
+소수이하 유효자리를 포함하는 것은 보장되고 반올림은 하지 않는다.
+
+입출력 예
+입력
+6 7 2
+출력
+0.85
+
+* answer 
+#include <stdio.h>
+
+#include <stdlib.h>
+
+#include <string.h>
+
+ 
+
+#define MAX 1010
+
+int main(void) {
+    int i,j;
+    int bunja, bunmo, sosu;
+    char buf[MAX] = {0,};
+    char mok,nam;
+
+    printf("insert data : ");
+    scanf("%d %d %d", &bunja, &bunmo, &sosu);
+
+    if (bunja > 1000 || bunmo > 1000 || sosu > 1000) {
+        printf("input num is too big(num < 1000)\n");
+        return -1;
+    }
+
+    for(i=0;i<sosu;i++) {
+        mok = (bunja*10) / bunmo;
+        nam = (bunja*10) % bunmo;
+        bunja = nam;
+        buf[i] = mok + '0';
+    }
+    buf[sosu] = '\0';
+
+    printf("result = 0.%s\n", buf);
+
+    return 0;
+}
 =======================================================================================
+안정된 형태로 통나무를 쌓기 위해서는 아래 그림과 같이 최하단 부터 쌓기 시작하여 한 층 위로 올라갈 때 마다 
+통나무 개수가 한 개씩 줄어 들도록 해야 한다. 이 때 최상단에 놓인 통나무의 수는 바로 아래 층의 통나무 개수보다 한 개 이상 적다.
 
+OO
+OOOO
+OOOOO
+OOOOOO
+
+N 개의 통나무를 안정된 형태로 쌓으려고 할 때, 최 상단에 놓일 수 있는 통나무의 개수와 이 때 최하단에 놓이는 통나무의 개수를 
+구하는 프로그램을 작성하시오. 단, 가능한 최하단에 놓이는 통나무의 수를 최소로 하는 답을 구하여 야 한다.
+
+입력 형식
+통나무의 개수가 입력된다. 통나무의 개수는 300 이하의 자연수이다.
+
+출력 형식
+최 하단과 최 상단에 놓일 통나무 수를 출력한다.
+
+입출력 예
+입력 
+18
+출력 
+6 3
+
+입력 
+19
+출력 
+6 1
+
+* answer #1
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+int main(void) {
+    int i,j;
+    int nVal, nTmp = 0;
+    int sum = 0;
+    int lowLogCount = 0;
+    int highLogCount = 0;
+
+
+    printf("insert logcount to stack : ");
+    scanf("%d", &nVal);
+
+    nTmp = nVal / 2;
+
+    for (j=0; j < nVal/2; j++) {
+        for (i=nTmp; i>0; i--) {
+            sum += i;
+            // 합이 통나무 총 개수와 같으면 값 저장
+            if (sum == nVal) {
+                highLogCount = i;   // 맨 위 통나무 수
+                lowLogCount = nTmp; // 맨 아래 통나무 수
+                break;
+            }
+            else if (sum > nVal) {  // 합이 통나무 총 개수보다 큰경우
+                highLogCount = i - (sum - nVal);    // 현재층의 통나무 수 - (over된 통나무)
+                lowLogCount = nTmp; // 맨 아래 통나무 수
+                break;
+            }
+        }
+
+        sum = 0;
+        nTmp--;
+    }
+
+    printf("output : %d, %d\n", lowLogCount, highLogCount);
+    return 0;
+}
 =======================================================================================
+영어 대소문자와 띄어쓰기(빈칸)만으로 이루어진 문장이 주어진다. 
+이 문장에는 몇 개의 단어가 있을까? 이를 구하는 프로그램을 작성하시오. 
+단, 단어는 띄어쓰기(빈칸)로 구분된다고 생각한다. 빈칸은 문장의 맨 앞에도 올 수 있다. 
 
+예제 입력 : I am a boy.
+예제 출력 : 4
+ 
+* answer #1
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+int main(void) {
+    int i,j;
+    char buf[40] = {0,};
+    char* pch = NULL;
+    int count = 0;
+
+    printf("insert data to parse : ");
+    fgets(buf, 40, stdin);
+    
+    pch = strtok(buf, " ");
+    while (pch != NULL) {
+        count++;
+        pch = strtok(NULL, " ");
+    }
+    printf("total word count : %d\n", count);
+    return 0;
+}
+
+* answer #2
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(int argc, char * argv[] ) {
+    if(argc < 2) {
+        printf("argc error\n");
+        return -1;
+    }
+    printf("%d\n", argc-1);
+
+    return EXIT_SUCCESS;
+}
 =======================================================================================
-
+* 
 =======================================================================================
 
 =======================================================================================
