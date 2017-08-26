@@ -889,7 +889,1080 @@ int main(int argc, char * argv[] ) {
     return EXIT_SUCCESS;
 }
 =======================================================================================
-* 
+연산자 우선수위
+
+* 단항연산자
+==============
+1. 단항연산자
+ --(감소)
+ ++(증가)
+ !(논리 not)
+ ~(비트 not)
+
+* 이항연산자
+=============
+2. 산술연산자
+ *, /, %, +, -
+
+3. 시프트연산자
+ <<, >>
+
+4. 관계연산자
+ <, <=, >=, >, ==, !=
+
+5. 비트연산자
+ &(and), ^(xor), |(or)
+
+6. 논리연산자
+ &&(논리 and), ||(논리 or)
+
+* 삼항연산자
+=============
+7. 조건연산자 
+ ?:
+
+8. 대입연산자
+ >>=, <<=, %=, /=, *=, -=, =
+
+9. 순서연산자
+ ,
+=======================================================================================
+1. 1부터 순서대로 입력된 긴 숫자가 있다. 
+123456789101112131415161718192021... 
+
+맨 왼쪽의 1을 첫 번째 자리로 시작하여, n 번째 자리에 무슨 숫자가 있는지 출력하시오. 
+위의 수열에서 예를 들면, 1을 첫 번째 자리로 하였을 때, n=3이면 3이고, n=25일 경우 7임을 알 수 있다. 
+
+입력
+정수 n 이 입력된다. 1 <= n < 1,000,000 
+
+출력
+n 번째 수를 출력한다. 
+
+입출력 예
+입력
+3
+출력
+3
+입력
+25
+출력
+7
+* answer #1
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+
+int main(void) {
+    int i,j,k;
+    char *ptr = NULL;
+    int findNum = 0;
+    char buf[10] = {0,};
+    int len = 0;
+
+    printf("insert data to find value : \n");
+    scanf("%d", &findNum);
+
+    if (findNum < 1 || findNum > 1000000) {
+        printf("please input 1 <= n < 1000000\n");
+        return -1;
+    }
+
+    ptr = malloc(sizeof(char) * findNum + 1);
+
+    j = 1;
+    for (i=0; i < findNum;) {
+        sprintf(buf, "%d", j);
+        len = strlen(buf);
+        k = 0;
+        while (k < len) {
+            ptr[i++] = buf[k++];
+        }
+        memset(buf, 0x0, 10);
+        j = j + 1;
+    }
+
+    printf("find num = %c\n", ptr[findNum-1]);
+    return 0;
+}
+
+* answer #2
+
+=======================================================================================
+2. 프로그램 명: rank_sort 요즘은 공정성과 정확성을 위해 대부분 컴퓨터를 이용해 채점을 한다. 
+각 개인별로 채점이 끝나고, 마지막 작업으로 각 사람들의 순위를 정해주고자 한다. 
+물론 점수가 높은 사람이 순위가 더 높다. 
+예를들어 85점, 105점, 92점을 받았다면, 각각 3등, 1등, 2등이다. 
+드물게 동점자가 나오는 경우도 있다. 예로 90, 100, 90, 80 점을 맞은 경우에는, 2등, 1등, 2등, 4등으로 처리하도록 한다. 
+입력•첫째 줄에는 사람의 수 N(1000 이하 정수)이 주어진다. •다음줄부터는 각 사람의 점수가 주어진다. 점수는 1000 이하의 정수이다. 
+출력입력된 순서대로 각 사람이 몇 등인지를 출력한다. 
+입출력 예
+입력
+597
+65
+84
+84
+91
+
+출력 
+15332
+
+* answer #1
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+typedef struct _score {
+    int jumsu;
+    int grade;
+} score;
+
+int main(void) {
+    int i,j;
+    int tmp = 0;
+    int count = 0;
+    int grade = 0;
+
+    score sc[10] = {0,};
+    score sc1[10] = {0,};
+
+    printf("input count : \n");
+    scanf("%d", &count);
+
+    for (i=0; i < count; i++) {
+        scanf("%d", &sc[i].jumsu);
+        sc[i].grade = 1;
+    }
+
+    for (i=0; i < count; i++) {
+        sc1[i].jumsu = sc[i].jumsu;
+        sc1[i].grade = sc[i].grade;
+        //memcpy(&sc1[i], &sc[i], sizeof(sc));
+    }
+
+    // 정렬
+    for (i=0; i < count-1; i++) {
+        for (j=0; j < count-1-i; j++) {
+            if (sc[j].jumsu > sc[j+1].jumsu) {
+                tmp = sc[j].jumsu;
+                sc[j].jumsu = sc[j+1].jumsu;
+                sc[j+1].jumsu = tmp;
+            }
+        }
+    }
+
+    // 동일점수 처리
+    for (i=4; i > 0; ) {
+        if (sc[i].jumsu == sc[i-1].jumsu) {
+            sc[i].grade = count - i;
+            sc[i-1].grade = count - i;
+            i = i - 1;
+        }
+        else {
+            sc[i].grade = count - i;
+        }
+        i = i - 1;
+    }
+    sc[i].grade = count;    // 마지막 등수 입력
+
+    // 원순서대로 점수 저장
+    for (i=0; i < count; i++) {
+        for (j=0; j < count; j++) {
+            if (sc1[i].jumsu == sc[j].jumsu) {
+                sc1[i].grade = sc[j].grade;
+            }
+        }
+    }
+
+    // 출력
+    for (i=0; i < count; i++) {
+        printf("%d ", sc1[i].grade);
+    }
+
+    return 0;
+}
+=======================================================================================
+1. 한 줄로 된 직사각형 건물들의 천장에 가로 스트로크를 사용하여 페인트를
+    칠할 때 모든 벽면을 칠할 수 있는 최소 획의 수를 구하는 프로그램을 완성하시오.
+  * 요구사항
+   - 가로 스트로크는 한번의 붓칠로 같은 높이의 연속된 벽면을 칠할 수 있다.
+   - 건물들은 모두 같은 너비이지만 높이는 다를 수 있다.
+   - 건물 N개의 높이를 저장한 배열 A가 제공된다.
+   - 만약 스트로크 수가 1,000,000,000개를 넘어가면 -1을 출력한다.
+
+
+  * 예시
+   $./stroke.exe
+     buildings high : 1 3 1 3 2 1
+     stroke : 5
+     buildings high : 1 2 3 4 3 2 1
+     stroke : 4
+     buildings high : 1 2 3 4 1 2 3 4
+     stroke : 7
+
+* answer #1
+/*
+ * 한 줄로 된 직사각형 건물들의 천장에 가로 스트로크를 사용하여 페인트를
+ * 칠할 때 벽면을 칠할 수 있는 최소 획의 수를 구하는 프로그램을 완성하시오.
+ *
+ * 요구사항
+ * - 가로 스트로크는 한번의 붓칠로 같은 높이의 연속된 벽면을 칠할 수 있다.
+ * - 건물들은 모두 같은 너비이지만 높이는 다를 수 있다.
+ * - 건물 N개의 높이를 저장한 배열 A가 제공된다.
+ * - 만약 스트로크 수가 1,000,000,000개를 넘어가면 -1을 출력한다.
+ *
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+
+int stroke_count(int A[], int N);
+void print_array(int arr[], int len);
+
+int main(void) {
+	int skyline1[] = { 1, 3, 1, 3, 2, 1 };
+	int skyline2[] = { 1, 2, 3, 4, 3, 2, 1 };
+	int skyline3[] = { 1, 2, 3, 4, 1, 2, 3, 4 };
+
+	print_array(skyline1, sizeof(skyline1)/sizeof(int));
+	//빌딩들을 모두 칠하기 위해서 필요한 최소 스트로크 수를 출력한다.
+	printf("stroke: %d\n", stroke_count(skyline1, sizeof(skyline1)/sizeof(int)));
+
+	print_array(skyline2, sizeof(skyline2)/sizeof(int));
+	//빌딩들을 모두 칠하기 위해서 필요한 최소 스트로크 수를 출력한다.
+	printf("stroke: %d\n", stroke_count(skyline2, sizeof(skyline2)/sizeof(int)));
+
+	print_array(skyline3, sizeof(skyline3)/sizeof(int));
+	//빌딩들을 모두 칠하기 위해서 필요한 최소 스트로크 수를 출력한다.
+	printf("stroke: %d\n", stroke_count(skyline3, sizeof(skyline3)/sizeof(int)));
+
+	return EXIT_SUCCESS;
+}
+
+/*
+ * 건물의 높이를 저장한 N개의 길이를 가진 배열 A를 바탕으로 최소 스트로크 수를 구하는 함수
+ * @param A: 건물의 높이를 저장한 배열
+ * @param N: 배열의 길이
+ * @return: 최소 스트로크의 수
+ */
+int stroke_count(int A[], int N)
+{
+	  int stroke = 0;
+	  int curr_high = 0;
+	  int i;
+
+	  for (i = 0; i < N; i++) {
+	      if (curr_high < A[i]) {
+	    	  // 다음 빌딩의 높이가 현재 건물 높이보다 높을 경우
+	    	  // 스트로크가 추가 된다.
+	    	  // ex) 2층 -> 3층: 1개의 스트로크 추가가 필요함
+	    	  printf("curr_high=%d, A[%d]=%d \n", curr_high, i, A[i]);
+	          stroke += A[i] - curr_high;
+
+	          // 스트로크 최대 값 확인.
+	          if (stroke > 1000000000) {
+	            return -1;
+	          }
+	      }
+	      //현재 건물의 높이를 갱신
+	      curr_high = A[i];
+	  }
+
+	  return stroke;
+}
+
+/*
+ * 배열의 모든 원소를 출력한다.
+ * @param A: 건물의 높이를 저장한 배열
+ * @param N: 배열의 길이
+ */
+void print_array(int arr[], int len) {
+	int i;
+	printf("buildings high: ");
+	for(i=0; i<len; i++)
+	{
+		printf("%d ", arr[i]);
+	}
+	printf("\n");
+}
+
+* answer #2
+int stroke_count(int A[], int N)
+{
+	int i, k, nMax = 0;
+	int sum = 0;
+	int nCount = 0;
+	int nStart = 0, nEnd;
+	unsigned char **buf;
+
+	for (i = 0; i<N; i++)
+	{
+		if (nMax < A[i])
+			nMax = A[i];
+	}
+
+	buf = (unsigned char **)malloc(sizeof(unsigned char*) * N);
+	if (buf == NULL) {
+		printf("buf is not alloced!\n");
+		return EXIT_FAILURE;
+	}
+
+	for (i = 0; i<N; i++)
+	{
+		buf[i] = (unsigned char *)malloc(sizeof(unsigned char) * nMax);
+		if (buf[i] == NULL) {
+			printf("buf[i] is not alloced!\n");
+			return EXIT_FAILURE;
+		}
+
+		memset(buf[i], 0x0, nMax);
+	}
+
+	// stroke 가 있으면 1로 채운다 
+	for (i = 0; i<N; i++)
+	{
+		for (k = 0; k<A[i]; k++)
+		{
+			buf[i][k] = 1;
+			printf("%d ", buf[i][k]);
+		}
+		printf("\n");
+	}
+
+	for (i=0; i<nMax; i++)
+	{
+		for (k=0; k<N-1; k++)
+		{
+			if (buf[k][i] < buf[k+1][i]) nCount++;
+			sum += buf[k][i];
+		}
+		sum += buf[k][i];
+		if (sum == N) nCount++;	// 0->1 혹은 모두 1인같嚥荑〉?증가   
+	}
+
+	// 메모리 해제
+	for (i = 0; i<N; i++)
+	{
+		free(buf[i]);
+	}
+
+	free(buf);
+
+	return nCount;
+}
+
+
+=======================================================================================
+2. 양의 정수를 입력 했을 때 그 수의 최대 Binary Gap을 구하는 프로그램을 작성한다.
+ * 요구사항.
+   - Binary Gap을 구할 정수 N을 아규먼트로 전달 받는다.
+   - N의 범위는 1부터 2,147,483,647까지 이다. 범위를 벗어난 경우 -1을 출력하고 종료한다.
+   - N의 최대 Binary Gap을 표준 출력장치에 출력한다.
+ 
+   Binary Gap 예제
+   0: 00             0 (No gap).
+   1: 01             0 (No gap)
+   2: 11             0 (No gap).
+   5: 101            1 (Gap is 1).
+   9: 1001           2 (Gap is 2).
+   529:  1000010001     4 (Max gap is 4).
+   1041: 10000010001    5 (Max gap is 5).
+
+* answer #1
+#include <stdio.h>
+#include <stdlib.h>
+
+int bin_gap(int N);
+void print_usage();
+
+int main(int argc, char *argv[]) {
+	int N;
+	//아규먼트를 입력 여부를 확인한다.
+	if((argc != 2))
+	{
+		print_usage();
+		return EXIT_FAILURE;
+	}
+
+	N = atoi(argv[1]);
+
+	//N값의 유효성을 검사한다.
+	if( N<1 || N>2147483647 )
+	{
+		printf("-1\n");
+		return EXIT_FAILURE;
+	}
+
+	//최대 Binary gap을 출력한다.
+	printf("%d\n", bin_gap(N));
+
+	return EXIT_SUCCESS;
+}
+
+/*
+ * 주어진 정수 N의 최대 binary gap을 구하는 함수
+ * @param N: binary gap을 구할 정수
+ * @return: N의 최대 binary gap
+ */
+int bin_gap(int N)
+{
+	int max=0, gap=0, start=0;
+
+	//N의 값을 오른쪽 shift를 반목하면서 0이 될 때까지 진행한다.
+	while( N > 0 ) {
+		//N의 마지막 bit가 1이면 Binary Gap이 시작되거나 종료됨.
+		if ((N&1) == 1) {
+			//종료 case를 생각해서 최대 값을 저장한다.
+			if (max < gap)
+				max = gap;
+			start = 1;
+			gap = 0;
+		}
+		//마지막 bit가 0이면 Binary Gap이 진행 중.
+		else {
+			if (start == 1)
+				gap++;
+		}
+		//N을 오른쪽으로 shift
+		N = N >> 1;
+	}
+	return max;
+}
+
+/*
+ * 사용법을 출력한다.
+ */
+void print_usage()
+{
+	puts("[usage] bgap.exe integer");
+}
+=======================================================================================
+3. 2진수를 표현하는 문자열을 정수로 변환하는 프로그램을 작성한다.
+   * 요구사항.
+    - 2진수 문자열은 최대 32글자를 넘지 않으며, 아규먼트로 전달 받는다.
+    - 아규먼트가 없거나, 입력한 문자열이 2진수가 아니거나 제한을 초과한경우 usage를 출력한다.
+    - 주어진 문자열을 정수로 가정 하여 변환 한다.
+    - 변환한 숫자를 표준 출력장치에 출력한다.
+
+   * 실행 예시
+    $ ./convert.exe 10
+       2
+      ./convert.exe 01001001
+       73
+
+* answer #1
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <math.h>
+
+int main(int argc, char** argv)
+{
+    int i, j;
+    char buf[30] = { 0, };
+    int sum = 0;
+    int tmp = 0;
+
+    if (argc != 2) {
+        printf("usage : ./convert.exe 10\n");
+        return -1;
+    }
+    if (strlen(buf) > 32) {
+        printf("input data cannot over 32 digit\n");
+        return -1;
+    }
+
+    strcpy(buf, argv[1]);
+
+    printf("buf = %s\n", buf);
+    for (i = strlen(buf) - 1; i >= 0; i--) {
+        if (buf[i] == '1') {
+            j = strlen(buf) - i - 1;
+            tmp = pow(2, j);
+            sum += tmp;
+        }
+    }
+    printf("converted decimal is %d\n", sum);
+    return 0;
+}
+
+* answer #2
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+int main(int argc, char * argv[])
+{
+    int nRes = 0;
+    int i, nMask;
+
+    if (argc != 2)
+    {
+        printf("Argument Error!\n");
+        return -1;
+    }
+
+    int nLen = strlen(argv[1]);
+    for (i=0; i<nLen; i++)
+    {
+        nMask = nLen - 1 - i;
+        if (argv[1][i] == '1')
+            nRes |= (1 << nMask);
+    }
+
+    printf("%d\n",nRes);
+    return EXIT_SUCCESS;
+}
+
+* answer #3
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+int bstr_to_dec(const char *str);
+int check_val(const char *str);
+void print_usage();
+
+int main(int argc, char *argv[])
+{
+	int dec;
+    
+	//아규먼트를 입력과 유효성을 확인한다.
+	if((argc != 2) || !check_val(argv[1]))
+	{
+		print_usage();
+		return EXIT_FAILURE;
+	}
+
+	//바이너리 문자열을 숫자로 변환한다.
+	dec = bstr_to_dec(argv[1]);
+	printf("%d\n", dec);
+	return EXIT_SUCCESS;
+}
+
+/*
+ * 주어진 바이너리 문자열을 숫자로 변환 한다.
+ * @param str: 바이너리 문자열
+ * @return: 바이너리 문자열을 변환한 정수
+ */
+int bstr_to_dec(const char *str)
+{
+	int val = 0;
+
+	//NULL 문자를 가리킬 때 까지 반복해서
+	//'1'일 경우만 1을 더한 뒤 2를 곱한 값을 저장한다.
+	while (*str != '\0') {
+		printf("%c ", *str);
+		val = 2 * val + (*str++ - '0');
+	}	
+
+	return val;
+}
+
+/*
+ * 주어진 바이너리 문자열의 유효성을 검사한다.
+ * @param str: 바이너리 문자열
+ * @return: 문자열의 유효성 여부. 유효하면 1 그렇지 않으면 0.
+ */
+int check_val(const char *str)
+{
+	int valid = 1;
+	if(strlen(str) > 32)
+		valid = 0;
+
+	while (valid && *str != '\0')
+	{
+		if (*str != '0' && *str != '1')
+			valid = 0;
+		++str;
+	}
+	return valid;
+}
+
+/*
+ * 사용법을 출력한다.
+ */
+void print_usage()
+{
+	puts("[usage] convert.exe binary_string");
+}
+
+=======================================================================================
+4. 링크드리스트를 이용하여 전화번호 관리 프로그램을 만드시오.
+  * 요구사항.
+    - 전화번호 관리 프로그램이 기본적으로 지녀야 하는 기능은 다음과 같다.
+     1. 입력: 이름과 전화번호를 입력
+     2. 삭제: 이름을 입력하여 해당 이름의 정보를 삭제
+     3. 검색: 이름을 입력하면 해당 이름의 전화번호를 출력
+     4. 전체 출력: 저장된 모든 이름과 전화번호 정보를 출력
+    - 사용자가 입력 할 수 있는 전화번호 개수에는 제한이 없다.
+    - 프로그램이 종료 되어도 기존 데이터를 유지 할 수 있도록 한다.
+     1. 새로운 데이터가 입력 될 때 마다 모든 데이터를 파일에 write 한다.
+     2. 프로그램을 시작 할 때 데이터가 저장된 파일이 있으면 read해서 정보를 load한다.
+
+  * 실행예시
+     ***** MENU *****
+     1.Insert
+     2.Delete
+     3.Search
+     4.Print All
+     0.Exit
+
+     Choose the item : 4
+     [Print All Data]
+     Name: kim   Tel: 010-2323-5343
+     Name: park  Tel: 010-3872-5000
+     ......
+
+* answer #1
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+//전화번호부 내용을 저장할 파일
+#define SAVE_FILE "pb.txt"
+//버퍼 크기
+#define BUF_SIZE 100
+
+//전화번호를 저장할 Node의 구조체 정의
+typedef struct _node
+{
+	char *name;
+	char *phone;
+	struct _node *next;
+}node;
+
+int get_selection(void);
+node* create_node(const char *name, const char* phone);
+void insert_node(node **root, node *new);
+void delete_phonebook(node **root, node *del);
+node* search_phonebook(node *root);
+void show_phonebook(node *root);
+int write_file(node *root, const char* filename);
+int read_file(node **root, const char* filename);
+char* f_gets(char *st, int n, FILE* fp);
+void eatline(void);
+void print_node(node *n);
+void free_all_node(node *root);
+void free_node(node *n);
+
+int main()
+{
+	setbuf(stdout, NULL);
+
+	//linked list의 root
+	node *root=NULL;
+	int sel=0;
+	//search 기능시 사용할 node 포인터
+	node *tmp;
+
+	//사용자 입력 버퍼
+	char buf_name[BUF_SIZE];
+	char buf_phone[BUF_SIZE];
+
+	//파일로 부터 저장된 list를 읽어온다.
+	read_file(&root, SAVE_FILE);
+
+	//메뉴를 출력하고 사용자로 부터 선택을 받는다.
+	while((sel=get_selection())> 0)
+	{
+		switch(sel)
+		{
+		case 1:
+			puts("[Insert Phonebook]");
+
+			//사용자로 부터 이름과 전화번호를 입력받는다.
+			printf("Input Name: ");
+			f_gets(buf_name, sizeof(buf_name), stdin);
+			printf("Input Tel Number: ");
+			f_gets(buf_phone, sizeof(buf_phone), stdin);
+
+			//Node를 생성한다.
+			tmp = create_node(buf_name, buf_phone);
+			if(tmp!= NULL)
+			{
+				//Node를 list에 삽입하고, 파일에 node의 내용을 write한다.
+				insert_node(&root, tmp);
+				write_file(root, SAVE_FILE);
+			}
+			break;
+
+		case 2:
+			puts("[Delete Phonebook]");
+			//Node를 찾는다.
+			tmp = search_phonebook(root);
+			if(tmp != NULL)
+			{
+				print_node(tmp);
+				//Node를 list에서 삭제하고, 파일에 node의 내용을 write한다.
+				delete_phonebook(&root,tmp);
+				write_file(root, SAVE_FILE);
+			}
+			else
+				puts("Can't find!");
+
+			break;
+
+		case 3:
+			puts("[Search Phonebook]");
+			//Node를 찾는다.
+			tmp = search_phonebook(root);
+			if(tmp != NULL)
+				print_node(tmp);
+			else
+				puts("Can't find!");
+
+			break;
+
+		case 4:
+			puts("[Print All Data]");
+			//모든 list를 출력한다.
+			show_phonebook(root);
+			break;
+
+		default:
+			puts("Wrong selection.");
+			break;
+		}
+	}
+
+	free_all_node(root);
+
+	return 0;
+}
+
+/*
+ * 메뉴를 출력하고 사용자로 부터 선택을 받는다.
+ * @return: 사용자 선택
+ */
+int get_selection(void)
+{
+	int ret = 0;
+	putchar('\n');
+	puts("***** MENU *****");
+	puts("1.Insert");
+	puts("2.Delete");
+	puts("3.Search");
+	puts("4.Print All");
+	puts("0.Exit");
+	printf("Choose the item:");
+	scanf("%d",&ret);
+
+	eatline();
+
+	return ret;
+}
+
+/*
+ * 사용자로 부터 name과
+ * @return: 사용자 선택
+ */
+node* create_node(const char *name, const char *phone)
+{
+	node *new = NULL;
+	if((new = (node*)malloc(sizeof(node))) != NULL)
+	{
+		new->name = strdup(name);
+		new->phone = strdup(phone);
+		new->next = NULL;
+	}
+	return new;
+}
+
+/*
+ * linked list에 node를 삽입하는 함수
+ * @param root: root node의 이중 포인터.
+ * @param new: linked list의 마지막에 연결할 node
+ */
+void insert_node(node **root, node *new)
+{
+	//linked list에 아무것도 없을 때
+	if(*root==NULL)
+	{
+		(*root)=new;
+	}
+	else
+	{
+		node *curr = *root;
+		//가장 마지막 node를 찾아서 삽입한다.
+		while(curr->next != NULL)
+			curr = curr->next;
+		curr->next = new;
+	}
+}
+
+/*
+ * 사용자로 부터 이름을 입력 받고 해당하는 node를 찾는다.
+ * @param root: list의 시작 주소
+ * @return: 찾은 node의 주소
+ */
+node* search_phonebook(node *root)
+{
+	node *curr = root;
+	char buf_name[100];
+
+	printf("Input Name: ");
+	f_gets(buf_name, sizeof(buf_name), stdin);
+
+	//node를 순회하면서 같은 이름의 node를 찾는다.
+	while(curr!=NULL)
+	{
+		if(!strcmp(curr->name, buf_name))
+			break;
+		curr=curr->next;
+	}
+	return curr;
+}
+
+/*
+ * linked list에서 node를 지운다.
+ * @param root: list의 시작 주소
+ * @param del: 삭제할 node의 주소
+ * @return: 찾은 node의 주소
+ */
+void delete_phonebook(node **root, node *del)
+{
+	node *curr = *root;
+
+	if(curr==NULL || del==NULL)
+		return;
+
+	// 첫번째 node를 삭제할 경우
+	if(*root==del)
+	{
+		*root=(*root)->next;
+	}
+	else
+	{
+		while(curr->next!=NULL)
+		{
+			if(curr->next==del)
+			{
+				curr->next=del->next;
+				break;
+			}
+			curr=curr->next;
+		}
+	}
+
+	free_node(del);
+}
+
+/*
+ * linked list의 모든 node를 출력한다.
+ * @param root: list의 시작 주소
+ */
+void show_phonebook(node *root)
+{
+	while(root!=NULL)
+	{
+		print_node(root);
+		root=root->next;
+	}
+}
+
+/*
+ * node의 내용을 출력한다.
+ * @param n: 출력할 node의 주소
+ */
+void print_node(node *n)
+{
+	printf("Name: %s\tTel: %s\n", n->name, n->phone);
+}
+
+/*
+ * 모든 node의 메모리를 해제하고 삭제한다.
+ * @param root: linked list의 시작 주소
+ */
+void free_all_node(node *root)
+{
+	node *del;
+	while(root!=NULL)
+	{
+		del = root;
+		root=root->next;
+
+		free_node(del);
+	}
+}
+
+/*
+ * node의 메모리를 해제한다.
+ * @param n: 삭제할 node의 주소
+ */
+void free_node(node *n)
+{
+	free(n->name);
+	free(n->phone);
+	free(n);
+}
+
+/*
+ * 파일에 linked list의 모든 내용을 write한다.
+ * @param root: list의 시작 주소
+ * @param filename: 파일 이름
+ * @return: 성공하면 1, 실패하면 0
+ */
+int write_file(node *root, const char *filename)
+{
+	FILE *fp=NULL;
+
+	if(root==NULL)
+		return 0;
+
+    if ((fp = fopen(filename,"wt")) == NULL)
+    {
+        printf("write_file can't open %s\n", filename);
+        return 0;
+    }
+
+	while(root!=NULL)
+	{
+		fprintf(fp, "%s\n%s\n", root->name, root->phone);
+		root=root->next;
+	}
+
+	fclose(fp);
+	return 1;
+}
+
+/*
+ * 파일로부터 내용을 읽어서 linked list에 복원한다.
+ * @param root: list의 시작 주소
+ * @param filename: 파일 이름
+ * @return: 성공하면 1, 실패하면 0
+ */
+int read_file(node **root, const char *filename)
+{
+	node *tmp;
+
+	char buf_name[100];
+	char buf_phone[100];
+
+	FILE *fp=NULL;
+
+    if ((fp = fopen(filename,"rt")) == NULL)
+    {
+        printf("read_file can't open %s\n", filename);
+        return 0;
+    }
+
+	while(1)
+	{
+		f_gets(buf_name, sizeof(buf_name), fp);
+		f_gets(buf_phone, sizeof(buf_phone), fp);
+		// while의 조건문에서 feof()를 호출하면, 파일의 끝이 제대로 검출 되지 않음.
+		// http://www.drpaulcarter.com/cs/common-c-errors.php#4.2
+	    if ( feof(fp) )
+	      break;
+		//새로운 node를 생성한다.
+		tmp = create_node(buf_name, buf_phone);
+		if(tmp!= NULL)
+			insert_node(root, tmp);
+	}
+
+	fclose(fp);
+	return 1;
+}
+
+/*
+ * fgets의 단점 (줄바꿈 문자)을 보완하는 함수
+ * @param st: 스트림으로 부터 입력을 저장할 버퍼
+ * @param n: 버퍼의 길이
+ * @param fp: 스트림 주소
+ * @return: fgets의 return 주소
+ */
+char* f_gets(char *st, int n, FILE *fp)
+{
+	char *ret_val;
+	char *find;
+
+	ret_val = fgets(st, n, fp);
+	if (ret_val)
+	{
+		find = strchr(st, '\r'); //캐리지 리턴('\r')의 위치를 찾는다.
+		if (find) // 만약 찾았다면,
+			*find = '\0'; // NULL 캐릭터로 채운다
+
+		find = strchr(st, '\n'); //뉴 라인('\n')의 위치를 찾는다.
+		if (find) // 만약 찾았다면,
+			*find = '\0'; // NULL 캐릭터로 채운다
+	}
+	return ret_val;
+}
+/*
+ * scanf로 입력을 받을때 입력 버퍼에
+ * 줄바꿈이 남아있는 문제를 해결하기 위한 함수.
+ */
+void eatline(void)
+{
+	while (getchar() != '\n')
+		continue;
+}
+
+=======================================================================================
+1. 1부터 100까지 숫자를 무작위로 1줄에 10개씩 text file로 저장하시오.  
+    숫자가 중복되어  저장돼서는 안 됨.  한 줄에 10개씩 출력. 숫자 사이에는 빈칸(space)으로 구분.
+    ex) output.txt
+92 18 84 4 61 10 47 39 66 98
+20 52 65 48 95 83 49 37 79 100
+23 41 12 21 17 28 82 33 29 87
+35 67 54 93 85 2 32 59 89 97
+63 42 57 25 56 6 64 75 36 24
+51 43 31 88 46 53 8 70 69 11
+38 91 74 73 5 99 16 77 76 30
+15 86 44 94 1 34 50 80 96 7
+27 9 3 14 78 60 19 26 45 81
+90 13 62 71 55 40 22 72 68 58
+
+* answer #1
+
+=======================================================================================
+2. 1번의 output.txt에 출력된 숫자가 중복된 수가 없는 것을 검증하는 코드를 작성하시오. 
+   중복된 수가 발견되면 그 수를 출력하고 종료. 이상 없으면 "Clear"출력
+   ex) 중복된 수가 56일 경우 "Error : 56"출력 후 종료
+       중복된 수가 없으면 "Clear" 출력
+       
+* answer #1
+
+
+=======================================================================================
+3. 3. 1~1000까지의 숫자 중 임의의 수 100개를 text file로 저장하시오.  
+   숫자가 중복되어  저장돼서는 안 됨.  한 줄에 10개씩 저장. 숫자 사이에는 빈칸(space)으로 구분.
+
+  ex) output.txt
+      6 4 2 3 8 10 11 92 99 22
+     33 45 67 89 100 101 643 1 999 111
+     ....
+
+* answer #1
+
+=======================================================================================
+4. 1~1000까지의 숫자 중 5개를 입력받아서, 3번의 output.txt 파일에서 존재하는지를 체크하시오. 
+   존재하면 1, 존재하지 않으면 0을 출력하시오. 
+  
+  ex) 입력 : 6 1000 555 2 3 
+      출력 : 1 0 0 1 1 
+* answer #1
+
+=======================================================================================
+5. 4번 문제를 이진 탐색으로 구현하시오. 
+
+
+=======================================================================================
+
+=======================================================================================
+
+=======================================================================================
+
+=======================================================================================
+
+=======================================================================================
+
+=======================================================================================
+
 =======================================================================================
 
 =======================================================================================
