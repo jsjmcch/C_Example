@@ -1,0 +1,347 @@
+* 프로그램 명: calfflac
+
+문장 속에 포함된 가장 큰 palindrome 을 찾는 문제이다.
+문장속에 포함된 A-Z 과 a-z 만을 고려하고 대소문자는 고려하지 않는다.
+문장의 전체 문자수는 20,000 을 넘지 않고 , 또한 가장 큰 palindrome 은 원 문장에서 특수문자를 제거하지 않은 상태에서 2,000 문자를 넘지 않는다고 하자.
+
+입력
+입력은 20,000 문자를 넘지 않는다. 여러 줄에 걸쳐서 입력될 수도 있다.
+
+출력
+출력은 첫 째줄에는 palindrome 을 이루는 문자의 크기를 출력하고 다음 줄에는 palindrome 을 이루는 특수문자나 숫자등을 제거하지 않은 원 문장을 출력한다.
+
+입출력 예
+입력
+Confucius say: Madam, I'm Adam.
+출력
+11
+Madam, I'm Adam
+
+
+* answer #1
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
+#include <ctype.h>
+
+#define MAX_SIZE 20000
+#define MAX_ANS_SIZE 2000
+
+int main(void) {
+    int i, j;
+    int center, back, front, spchCnt;
+    int size = 0, diffLen = 0, retLen = 0;
+    char buf[MAX_SIZE + 1] = { 0 };
+    char tmpBuf[200] = { 0 };
+    char result[MAX_ANS_SIZE + 1] = { 0 };
+
+    // input Data
+    printf("insert text : ");
+    while (1) {
+        fgets(tmpBuf, sizeof(tmpBuf), stdin);
+        if (strncmp(tmpBuf, "exit", 4) == 0) break; // input exit if quit.
+        else {
+            strcat(buf, tmpBuf);
+            if (strlen(buf) > MAX_SIZE) {
+                printf("input data is too long\n");
+                return EXIT_FAILURE;
+            }
+        }
+    }
+
+    size = strlen(buf);
+
+    // Data compare
+    for (center = 0; center < size - 1; center++) {
+        spchCnt = 0;    // special char count
+        for (back = 1, front = 1;
+                (center - back >= 0) && (center + front <= size - 1);
+                    back++, front++)
+        {
+            // i를 기준 앞뒤로 특수문자를 제외한 알파벳 back, front index 구함
+            // back index move
+            while ((center - back >= 0) && (isalpha(buf[center-back]) == false)) {
+                spchCnt++;
+                back++;
+            }
+            // front index move
+            while ((center + front <= size - 1) && (isalpha(buf[center+front]) == false)) {
+                spchCnt++;
+                front++;
+            }
+
+            // if equal,
+            if (tolower(buf[center-back]) == tolower(buf[center+front])) {
+                if (front + back + 1 > diffLen) {
+                    diffLen = front + back + 1;
+                    memset(result, 0x0, strlen(result));
+                    strncpy(result, &buf[center-back], diffLen);    // copy palindrome
+                    retLen = diffLen - spchCnt;                     // save palindrome length
+                    if (strlen(result) > MAX_ANS_SIZE) {
+                        printf("palindrome is too long\n");
+                        return EXIT_FAILURE;
+                    }
+                }
+            }
+            else break;
+        }
+    }
+
+    printf("%d\n", retLen);
+    printf("%s\n", result);
+
+    return EXIT_SUCCESS;
+}
+
+* answer #2
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+char* palindrome_normalize(char* str)
+{
+        int len = strlen(str);
+        char* p = (char*)malloc(len + 1);
+        char* s = str;
+        char* d = p;
+
+        while (*s)
+        {
+                if (isalpha(*s))
+                {
+                        *d = tolower(*s);
+                        d++;
+                }
+                s++;
+        }
+        *d = '\0';
+        return p;
+}
+
+char* strdup_reverse(char* str)
+{
+        int len = strlen(str);
+        char* r = (char*)malloc(len + 1);
+        char* s = str + len - 1;
+        char* d = r;
+
+        while (s >= str)
+                *d++ = *s--;
+        *d = '\0';
+        return r;
+}
+
+int get_diff_index(char* s1, char* s2)
+{
+        int idx;
+
+        for (idx = 0; *s1 && *s2; s1++, s2++, idx++)
+        {
+                if (*s1 != *s2)
+                        return idx;
+        }
+        return idx;
+}
+
+void print_palindrome(char* str, int index, int length)
+{
+        int i;
+        char* p = str;
+
+        for (i = 0; i < index && *p; p++)
+        {
+                if (isalpha(*p))
+                        i++;
+        }
+        while (*p && !isalpha(*p))
+                p++;
+
+        printf("%d\n", length);
+        for (i = 0; i < length && *p; p++)
+        {
+                printf("%c", *p);
+                if (isalpha(*p))
+                        i++;
+        }
+}
+
+int main(int argc, char* argv[])
+{
+        char* origin;
+        char* normal;
+        char* reverse;
+        int length;
+        int palindrome_idx = -1;
+        int palindrome_len = 0;
+        int i, j;
+
+        if (argc < 2)
+                exit(1);
+
+        origin = strdup(argv[1]);
+        normal = palindrome_normalize(origin);
+        reverse = strdup_reverse(normal);
+        length = strlen(normal);
+        if (length < 3)
+        {
+                printf("not enough string.\n");
+                goto done;
+        }
+
+        for (i = 0; i < length-2; i++)
+        {
+                for (j = 0; j < length-2; j++)
+                {
+                        int idx = get_diff_index(normal+i, reverse+j);
+
+                        if (idx > 2 && idx > palindrome_len)
+                        {
+                                palindrome_idx = i;
+                                palindrome_len = idx;
+                        }
+                }
+        }
+
+        if (palindrome_idx >= 0 && palindrome_len > 0)
+                print_palindrome(origin, palindrome_idx, palindrome_len);
+done:
+        free(origin);
+        free(normal);
+        free(reverse);
+        return 0;
+}
+=======================================================================================
+프로그램 명: rbit(open)
+입력받은 16진수를 바이트로 표현했을 때, 그 바이트 값을 거꾸로 뒤집는 문제이다.
+
+입력받은 16진수가 72라면 비트 값은 다음과 같다.
+0 1 1 1 0 0 1 0
+
+이것을 비트 단위에서 역순으로 뒤집으면 다음과 같다. (엔디안 표기법에서 바이트 단위를 뒤집는 것과 다르다.)
+0 1 0 0 1 1 1 0
+
+이것을 16진수로 나타내면 4E가 된다.
+
+입력
+16진수 두 자리를 입력으로 받는다.
+
+출력
+비트를 뒤집은 16진수를 출력한다. 문자의 경우 대문자로 출력한다.
+
+입출력 예시
+입력
+72
+출력
+4E
+
+* answer #1
+ 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+
+int main(int argc, char *argv[]) {
+    int i,j;
+    long int input = 0;
+    char buf[50] ={0};
+    char *ptr;
+    div_t divresult;
+
+    if (argc < 2 || argc > 2) {
+        printf("argc error\n");
+        return -1;
+    }
+
+    if (strlen(argv[1]) != 2) {
+        printf("input 2digit, please\n");
+        return -1;
+    }
+
+    printf("입력 : \n");
+    printf("%s\n", argv[1]);
+
+    input = strtol(argv[1], &ptr, 16);
+
+    i = 0;
+    while(i<=7) {
+        divresult = div(input,2);
+        buf[i] = divresult.rem + '0';
+        input = divresult.quot;
+        i++;
+    }
+
+    input = strtol(buf, &ptr, 2);
+    printf("출력 : \n");
+    printf("%x", input);
+
+    return 0;
+}
+
+* answer #2
+ 
+#include <stdio.h>
+#include <string.h>
+
+char hex_reverse_lookup[16] = {
+        '0', '8', '4', 'C',
+        '2', 'A', '6', 'E',
+        '1', '9', '5', 'D',
+        '3', 'B', '7', 'F'
+};
+
+int main(int argc, char* argv[])
+{
+        char* hex;
+        int len;
+        int i;
+
+        if (argc < 2)
+                return 1;
+
+        hex = argv[1];
+        len = strlen(hex);
+        for (i = len-1; i >= 0; i--)
+        {
+                int val = 0;
+                if (hex[i] >= '0' && hex[i] <= '9')
+                        val = hex[i] - '0';
+                else if (hex[i] >= 'A' && hex[i] <= 'F')
+                        val = hex[i] - 'A' + 10;
+                else if (hex[i] >= 'a' && hex[i] <= 'f')
+                        val = hex[i] - 'a' + 10;
+                else
+                        printf("\ninvalid hex value %c\n", hex[i]);
+                printf("%c", hex_reverse_lookup[val]);
+        }
+        printf("\n");
+        return 0;
+}
+
+=======================================================================================
+
+=======================================================================================
+
+=======================================================================================
+
+=======================================================================================
+
+=======================================================================================
+
+=======================================================================================
+
+=======================================================================================
+
+=======================================================================================
+
+=======================================================================================
+
+=======================================================================================
+
+=======================================================================================
+
+=======================================================================================
+
+=======================================================================================
