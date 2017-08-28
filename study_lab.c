@@ -320,6 +320,44 @@ int main(int argc, char* argv[])
         return 0;
 }
 
+* answer #3
+#include <stdio.h>
+#include <math.h>
+
+int main(void)
+{
+ short nInput, i;
+ short nMask;
+ char szHex[9] = {0,};
+ short nOutput;
+
+ scanf("%X",&nInput);
+ for (i=0; i<8; i++)
+ {
+ 	nMask = (1 << (7-i));
+  	if (nInput & nMask)
+  	{
+   		szHex[i] = '1';
+  	}
+  	else
+  	{
+   		szHex[i] = '0';
+  	}
+ }
+
+ nOutput = 0;
+ for (i=0; i<8; i++)
+ {
+  	if (szHex[i] == '1')
+  	{
+   		nOutput += pow(2,i);
+  	}
+ }
+ printf("%X\n",nOutput);
+ return 0;
+}
+
+
 =======================================================================================
 Exercise 문제 #2 - Log Parsing
 이번 연습 문제에서는 access.log 파일을 파싱하여 URL 호출 성공 횟수와 이미지 파일 호출 횟수를 세는 프로그램을 작성한다.
@@ -2799,13 +2837,475 @@ int main(int argc, char * argv[])
 	return 0;
 }
 =======================================================================================
+<Elevator Program>
+
+1.
+#include <stdio.h>
+#include <time.h>
+
+void TransTime(char * strTime, struct tm * pTime)
+{
+    time_t ct;
+    char szHour[3], szMin[3], szSec[3];
+
+    szHour[0] = strTime[0]; szHour[1] = strTime[1]; szHour[2] = 0;
+    szMin[0] = strTime[3]; szMin[1] = strTime[4]; szMin[2] = 0;
+    szSec[0] = strTime[6]; szSec[1] = strTime[7]; szSec[2] = 0;
+
+    ct = time(NULL);
+    *pTime = *localtime(&ct);
+
+    pTime->tm_hour = atoi(szHour);
+    pTime->tm_min = atoi(szMin);
+    pTime->tm_sec = atoi(szSec);
+}
+
+int main(void)
+{
+    struct tm inputTime;
+    struct tm stopTime;
+    time_t tInput, tStop=0;
+    char strTime[80];
+    int nFromLevel;
+    int nToLevel;
+    int nWaitingTime = 0;
+    int nStopLevel = 0;
+    int nRidingTime = 1;
+    int nElevatorNum;
+    int nCurrentPos = 1;
+    int bFirst = 1;
+
+    while(1)
+    {
+	scanf("%s %d %d",strTime, &nFromLevel, &nToLevel);
+	if (strcmp(strTime,"q") == 0)
+	    return 0;
+
+	TransTime(strTime,&inputTime);
+	//printf("InputTime - %02d:%02d:%02d\n",inputTime.tm_hour, inputTime.tm_min, inputTime.tm_sec);
+	tInput = mktime(&inputTime);
+
+        nWaitingTime = abs(nCurrentPos - nFromLevel);
+
+	if (tStop > tInput) 
+	{
+	    nWaitingTime = -1;
+	    nElevatorNum = -1;
+	}
+	else 
+	{
+	    nElevatorNum = 1;
+	    nCurrentPos = nToLevel;
+	    
+	    tStop = tInput + nWaitingTime + abs(nToLevel-nFromLevel)+nRidingTime;
+	    stopTime = *localtime(&tStop);
+	    //printf("StopTime - %02d:%02d:%02d\n",stopTime.tm_hour, stopTime.tm_min, stopTime.tm_sec);
+	}
+
+	printf("%d %d\n",nElevatorNum, nWaitingTime);
+    }
+}
+
+2.
+#include <stdio.h>
+#include <time.h>
+
+void TransTime(char * strTime, struct tm * pTime)
+{
+    time_t ct;
+    char szHour[3], szMin[3], szSec[3];
+
+    szHour[0] = strTime[0]; szHour[1] = strTime[1]; szHour[2] = 0;
+    szMin[0] = strTime[3]; szMin[1] = strTime[4]; szMin[2] = 0;
+    szSec[0] = strTime[6]; szSec[1] = strTime[7]; szSec[2] = 0;
+
+    ct = time(NULL);
+    *pTime = *localtime(&ct);
+
+    pTime->tm_hour = atoi(szHour);
+    pTime->tm_min = atoi(szMin);
+    pTime->tm_sec = atoi(szSec);
+}
+
+int main(void)
+{
+    struct tm inputTime;
+    struct tm stopTime;
+    time_t tInput, tStop=0;
+    time_t tPrevInput = 0;
+    char strTime[80];
+    int nFromLevel;
+    int nToLevel;
+    int nWaitingTime= 0;
+    int nStopLevel = 0;
+    int nRidingTime = 1;
+    int nGetoutTime = 1;
+    int nElevatorNum = 1;
+    int nCurrentPos = 1;
+    int bFirst = 1;
+
+    while(1)
+    {
+	scanf("%s %d %d",strTime, &nFromLevel, &nToLevel);
+	if (strcmp(strTime,"q") == 0)
+	    return 0;
+
+	TransTime(strTime,&inputTime);
+	//printf("InputTime - %02d:%02d:%02d\n",inputTime.tm_hour, inputTime.tm_min, inputTime.tm_sec);
+	tInput = mktime(&inputTime);
+
+	nWaitingTime = abs(nCurrentPos - nFromLevel);
+
+	if (tStop > tInput) 
+	{
+	    nWaitingTime += tStop - tInput;
+	    if (nCurrentPos != nFromLevel) 
+		nWaitingTime += nGetoutTime;
+	}
+
+	{
+	    nCurrentPos = nToLevel;
+	    tPrevInput = tInput;
+	    
+	    tStop = tPrevInput + nWaitingTime + abs(nToLevel-nFromLevel)+nRidingTime;
+	    //stopTime = *localtime(&tStop);
+	    //printf("StopTime - %02d:%02d:%02d\n",stopTime.tm_hour, stopTime.tm_min, stopTime.tm_sec);
+	}
+
+	printf("%d %d\n",nElevatorNum, nWaitingTime);
+    }
+}
+
+3. 
+#include <stdio.h>
+#include <time.h>
+
+void TransTime(char * strTime, struct tm * pTime)
+{
+    time_t ct;
+    char szHour[3], szMin[3], szSec[3];
+
+    szHour[0] = strTime[0]; szHour[1] = strTime[1]; szHour[2] = 0;
+    szMin[0] = strTime[3]; szMin[1] = strTime[4]; szMin[2] = 0;
+    szSec[0] = strTime[6]; szSec[1] = strTime[7]; szSec[2] = 0;
+
+    ct = time(NULL);
+    *pTime = *localtime(&ct);
+
+    pTime->tm_hour = atoi(szHour);
+    pTime->tm_min = atoi(szMin);
+    pTime->tm_sec = atoi(szSec);
+}
+
+int main(void)
+{
+    int i;
+    struct tm inputTime;
+    struct tm stopTime;
+    time_t tInput;
+    time_t tStop[4] = {0,};
+    time_t tPrevInput = 0;
+    char strTime[80];
+    int nFromLevel;
+    int nToLevel;
+    int nWaitingTime[4] = {0,};
+    int nMinWaitingTime = 0;
+    int nStopLevel = 0;
+    int nRidingTime = 1;
+    int nGetoutTime = 1;
+    int nElevatorNum;
+    int nCurrentPos[4] = {1,1,1,1};
+    int bFirst = 1;
+
+    while(1)
+    {
+	scanf("%s %d %d",strTime, &nFromLevel, &nToLevel);
+	if (strcmp(strTime,"q") == 0)
+	    return 0;
+
+	TransTime(strTime,&inputTime);
+	//printf("InputTime - %02d:%02d:%02d\n",inputTime.tm_hour, inputTime.tm_min, inputTime.tm_sec);
+	tInput = mktime(&inputTime);
+
+	for (i=0; i<4; i++)
+	{
+	    nWaitingTime[i] = abs(nCurrentPos[i] - nFromLevel);
+
+	    if (tStop[i] >= tInput) 
+	    {
+		nWaitingTime[i] += tStop[i] - tInput;
+	        if (nCurrentPos[i] != nFromLevel) 
+		    nWaitingTime[i] += nGetoutTime;
+	    }
+	}
+
+	nMinWaitingTime = nWaitingTime[0];
+	nElevatorNum = 0;
+	for (i=1; i<4; i++)
+	{
+	    if (nMinWaitingTime > nWaitingTime[i])
+	    {
+		nMinWaitingTime = nWaitingTime[i];
+		nElevatorNum = i;
+	    }
+	}
+
+
+        nCurrentPos[nElevatorNum] = nToLevel;
+	tPrevInput = tInput;
+	    
+	tStop[nElevatorNum] = tPrevInput + nWaitingTime[nElevatorNum] + abs(nToLevel-nFromLevel)+nRidingTime;
+	    //stopTime = *localtime(&tStop);
+	    //printf("StopTime - %02d:%02d:%02d\n",stopTime.tm_hour, stopTime.tm_min, stopTime.tm_sec);
+	
+
+	printf("%d %d\n",nElevatorNum+1, nWaitingTime[nElevatorNum]);
+    }
+}
+=======================================================================================
+표준 입력으로 정수와 길이 10 이하의 문자열이 입력됩니다. 
+입력된 문자열을 정수만큼 문자 단위로 N-gram을 출력하는 프로그램을 만드세요
+(scanf 함수 호출 전에 문자열을 출력하면 안 됩니다). 만약 입력된 문자열의 길이가 입력된 정수 미만이라면 wrong을 출력하세요.
+N-gram이란? 
+n-gram 은 통계적인 자연어 처리에서 널리 사용되는 모델이다. 어떠한 글에서 여러 문자나 단어들의 빈도수를 알아낼 때 유용하다.
+
+입력
+3 Beethoven
+
+결과
+Bee
+eet
+eth
+tho
+hov
+ove
+ven
+ 
+* answer #1
+/*
+ * ngram.c
+ *
+ *  Created on: 2017. 4. 3.
+ *      Author: 74903
+ */
+
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+int main(int argc, char** argv) {
+	if(argc < 3) {
+		printf("argc error\n");
+		return -1;
+	}
+
+	char buf[11];
+	memset(buf, 0x00, 11);
+
+	int nCount = atoi(argv[1]);
+	sprintf(buf, "%s", argv[2]);
+
+	int nMax = strlen(buf);
+
+	if(nMax < nCount) {
+		printf("wrong");
+		return -1;
+	}
+
+	for(int i=0; i<nMax; i++) {
+		if(i+2 > nMax-1) break;
+		printf("%c%c%c\n", buf[i], buf[i+1], buf[i+2]);
+	}
+
+	return 0;
+}
 
 =======================================================================================
+표준 입력으로 정수 10개와 정수 1개가 각 줄에 입력됩니다. 
+여기서 정수 10개는 연결 리스트에 저장되고, 정수 1개는 삭제할 정수입니다. 
+다음 소스 코드에서 removeNode 함수를 완성하여 연결 리스트에서 특정 숫자가 저장된 노드를 삭제하세요. 
+단, 머리 노드 삭제 기능은 구현하지 않아도 됩니다.
+
+예
+입력
+10 20 30 40 50 60 70 80 90 100
+40
+
+결과
+100 90 80 70 60 50 30 20 10
+ 
+* sample
+/*
+ * linkedlist2.c
+ *
+ *  Created on: 2017. 4. 3.
+ *      Author: 74903
+ */
+/*
+10 20 30 40 50 60 70 80 90 100
+40
+
+100 90 80 70 60 50 30 20 10
+*/
+
+#include <stdio.h>
+#include <stdlib.h>
+
+struct NODE {
+    struct NODE *next;
+    int data;
+};
+
+void addFirst(struct NODE *target, int data)
+{
+    struct NODE *newNode = malloc(sizeof(struct NODE));
+    newNode->next = target->next;
+    newNode->data = data;
+    target->next = newNode;
+}
+
+void removeNode(struct NODE *node, int data)
+{
+    //TODO:
+}
+
+int main()
+{
+    int numArr[10] = { 0, };
+    int removeNum;
+
+    scanf("%d %d %d %d %d %d %d %d %d %d",
+        &numArr[0], &numArr[1], &numArr[2], &numArr[3], &numArr[4],
+        &numArr[5], &numArr[6], &numArr[7], &numArr[8], &numArr[9]
+    );
+
+    scanf("%d", &removeNum);
+
+    struct NODE *head = malloc(sizeof(struct NODE));
+    head->next = NULL;
+
+    for (int i = 0; i < 10; i++)
+    {
+        addFirst(head, numArr[i]);
+    }
+
+    removeNode(head, removeNum);
+
+    struct NODE *curr = head->next;
+
+    while (curr != NULL)
+    {
+        printf("%d ", curr->data);
+        curr = curr->next;
+    }
+
+    curr = head->next;
+
+    while (curr != NULL)
+    {
+        struct NODE *next = curr->next;
+        free(curr);
+        curr = next;
+    }
+
+    free(head);
+
+    return 0;
+}
+
+* answer #1
+void removeNode(struct NODE *node, int data)
+{
+    //TODO:
+	if(node == NULL) return;
+
+	struct NODE *prev = node;
+	struct NODE *cur = node->next;
+	while(cur != NULL) {
+		if(cur->data == data) {
+			prev->next = cur->next;
+			free(cur);
+		}
+		prev = cur;
+		cur = cur->next;
+	}
+ }
 
 =======================================================================================
+표준 입력으로 3명의 인적 정보가 입력됩니다(홀수 번째는 이름, 짝수 번째는 나이). 다음 소스 코드에서 getPrintFunc 함수를 작성하여 입력된 인적 정보가 각 줄에 출력되게 만드세요.
 
-=======================================================================================
+정답에는 밑줄 친 부분에 들어갈 코드만 작성해야 합니다.
 
+
+예
+
+입력
+홍대용 49 정약용 18 박제가 30
+
+
+결과
+홍대용 49
+정약용 18
+박제가 30
+
+ 
+
+#include <stdio.h>
+
+ 
+
+struct Person {
+    char name[30];
+    int age;
+    void (*print)(struct Person *);
+};
+
+ 
+
+void print(struct Person *p)
+{
+    printf("%s %d\n", p->name, p->age);
+}
+ 
+void executer(void (*fp[])(struct Person *), struct Person p[], int count)
+{
+    for (int i = 0; i < count; i++)
+    {
+        fp[i](&p[i]);
+    }
+}
+
+__________________________
+__________________________
+__________________________
+__________________________
+
+ 
+
+int main()
+{
+    struct Person p[3];
+    p[0].print = print;
+    p[1].print = print;
+    p[2].print = print;
+
+    scanf("%s %d %s %d %s %d",
+        p[0].name,& p[0].age,
+        p[1].name,& p[1].age,
+        p[2].name,& p[2].age
+    );
+
+    void (*fp[3])(struct Person *);
+
+    for (int i = 0; i < sizeof(p) / sizeof(struct Person); i++)
+    {
+        fp[i] = getPrintFunc(&p[i]);
+    }
+
+    executer(fp, p, sizeof(p) / sizeof(struct Person));
+
+    return 0;
+}
 =======================================================================================
 
 =======================================================================================
