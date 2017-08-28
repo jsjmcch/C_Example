@@ -3232,27 +3232,21 @@ void removeNode(struct NODE *node, int data)
  }
 
 =======================================================================================
-표준 입력으로 3명의 인적 정보가 입력됩니다(홀수 번째는 이름, 짝수 번째는 나이). 다음 소스 코드에서 getPrintFunc 함수를 작성하여 입력된 인적 정보가 각 줄에 출력되게 만드세요.
+표준 입력으로 3명의 인적 정보가 입력됩니다(홀수 번째는 이름, 짝수 번째는 나이). 
+다음 소스 코드에서 getPrintFunc 함수를 작성하여 입력된 인적 정보가 각 줄에 출력되게 만드세요.
 
 정답에는 밑줄 친 부분에 들어갈 코드만 작성해야 합니다.
 
-
 예
-
 입력
 홍대용 49 정약용 18 박제가 30
-
-
+	
 결과
 홍대용 49
 정약용 18
 박제가 30
 
- 
-
 #include <stdio.h>
-
- 
 
 struct Person {
     char name[30];
@@ -3307,11 +3301,424 @@ int main()
     return 0;
 }
 =======================================================================================
+표준 입력으로 x, y 좌표 두 개가 입력됩니다. 다음 소스 코드를 완성하여 두 점 사이의 거리가 출력되게 만드세요. 
+이때 두 점 사이의 거리는 double형 실수로 출력되어야 합니다..
+정답에는 밑줄 친 부분에 들어갈 코드만 작성해야 합니다.
+
+입력
+10 10 20 20
+
+출력
+14.142136
+
+#include <stdio.h>
+#include <math.h>
+
+struct Point2D {
+    int x;
+    int y;
+};
+
+___________________________
+____________________________
+____________________________
+____________________________
+____________________________
+____________________________
+____________________________
+
+int main()
+{
+    struct Point2D p1;
+    struct Point2D p2;
+	
+    scanf("%d %d %d %d", &p1.x, &p1.y, &p2.x, &p2.y);
+    printf("%f\n", getDistance(p1, p2));
+
+    return 0;
+}
+
+*answer #1
+#include <stdio.h>
+#include <math.h>
+#include <string.h>
+#include <stdlib.h>
+
+struct Point2D {
+    int x;
+    int y;
+};
+
+float getDistance(struct Point2D p1, struct Point2D p2) {
+    int x = pow(p1.x-p2.x, 2);
+    int y = pow(p1.y-p2.y, 2);
+
+    return sqrt(x+y);
+}
+
+int main(int argc, char * argv[]) {
+    if(argc < 5)
+    {
+        printf("argc error\n");
+        return -1;
+    }
+
+    struct Point2D p1;
+    struct Point2D p2;
+
+    p1.x = atoi(argv[1]);
+    p1.y = atoi(argv[2]);
+    p2.x = atoi(argv[3]);
+    p2.y = atoi(argv[4]);
+
+    printf("%f\n", getDistance(p1, p2));
+}
+
+* answer #2
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+
+struct Point2D {
+    int x;
+    int y;
+};
+
+float getDistance(struct Point2D p1, struct Point2D p2) {
+    int point1 = 0;
+    int point2 = 0;
+    float fval = 0.0f;
+    point1 = p2.x - p1.x;
+    point2 = p2.y - p1.y;
+
+    fval = sqrt(pow(point1,2) + pow(point2,2));
+
+    return fval;
+}
+
+int main()
+{
+    struct Point2D p1;
+    struct Point2D p2;
+
+    scanf("%d %d %d %d", &p1.x, &p1.y, &p2.x, &p2.y);
+    printf("%f\n", getDistance(p1, p2));
+
+    return 0;
+}
 
 =======================================================================================
+이번 연습문제에서는 1~1000까지 369 게임 시 박수를 몇 번 치게 되는지 계산하는 프로그램을 작성한다.
 
-=======================================================================================
+※ 369 게임이란?
+1) 숫자를 1부터 차례대로 세면서 3, 6, 9가 나오면 그 개수만큼 박수를 치는 게임이다.
+2) 10의 자리에서 369 숫자가 중복으로 겹칠시에는(ex. 33, 36, 39) 박수를 두 번 치게 된다.
+3) 100의 자리에서 369 숫자가 중복으로 두 번 겹칠 시에는(ex. 133, 169, 193) 박수를 두 번 치게 된다.
+4) 100의 자리에서 369 숫자가 중복으로 세 번 겹칠 시에는(ex. 333, 666, 699) 박수를 세 번 치게 된다.
 
-=======================================================================================
+<요구사항>
+1. 제공된 프로그램을 완성하며, 1부터 어느 수까지 369게임을 할 것인지는 아규먼트로 입력한다.
+2. 입력이 허용된 숫자는 1~10,000이며, 1이하는 1로, 10,000 이상은 10,000으로 처리한다.
+3. 입력된 숫자까지 박수의 총 횟수를 표준 출력 장치에 표시한다.
 
+<실행예시>
+./game.exe 100
+60
+ 
+* answer #1
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+int main(int argc, char * argv[] ) {
+	int number, count=0;
+	char numStr[10];
+
+	if (argc != 2){
+		printf ("Please execute with Number\nex)game.exe 1000");
+		return EXIT_SUCCESS;
+	}
+
+	number = atoi(argv[1]);
+	if (number < 1) number = 1;
+	else if (number > 10000) number = 10000;
+
+	for(int i=1; i<=number; i++)
+	{
+		sprintf(numStr, "%d", i);
+
+		for (int j=0; j<sizeof(numStr); j++)
+		{
+			if (numStr[j]=='3' || numStr[j] == '6' || numStr[j]=='9')
+				count++;
+		}
+	}
+	printf ("%d\n", count);
+
+	return EXIT_SUCCESS;
+}
 =======================================================================================
+이번 연습문제에서는 정수와 실수를 비트 형태로 출력하는 프로그램을 작성한다.
+<요구사항>
+1. 정수와 실수를 하나씩 순서대로 입력받아 비트열을 출력한다.
+2. Little Endian 시스템에서 수행하는것으로 가정한다.
+※ Little Endian 시스템이란, 값이 작은 바이트를 메모리 낮은 번지부터 저장하는 방식임.
+3. 4비트씩 끊어서 출력한다. (ex. 1111 0000 1010 0101)
+
+<실행예시>
+$ ./print_bit.exe 1000 1234.56
+0000 0000 0000 0000 0000 0011 1110 1000 : 1000
+0100 0100 1001 1010 0101 0001 1110 1100 : 1234.560059
+$ ./print_bit.exe -1 -1.999999
+1111 1111 1111 1111 1111 1111 1111 1111 : -1
+1011 1111 1111 1111 1111 1111 1111 1000 : -1.999999
+
+* answer #1
+/*
+ * 정수와 실수를 비트 형태로 출력하는 프로그램을 작성한다.
+ *
+ * 요구사항
+ * - 정수와 실수를 하나씩 순서대로 입력 받아 비트열을 출력한다.
+ * - Little Endian 시스템에서 수행하는 것으로 가정한다.
+ *   ※ Little Endian 시스템이란, 값이 작은 바이트를 메모리 낮은 번지 부터 저장하는 방식임.
+ * - 4비트씩 끊어서 출력한다. (ex. 1111 0000 1010 0101)
+ *
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+void print_usage();
+
+int main(int argc, char *argv[]) {
+
+	int inum;
+	float fnum;
+
+	//아규먼트를 입력 여부를 확인한다.
+	if(argc != 3)
+	{
+		print_usage();
+		return EXIT_FAILURE;
+	}
+
+	inum = atoi(argv[1]);
+	int size = sizeof(int)*8;
+	char* p = (char*)malloc(size+1);
+
+	for(int i=size-1; i>=0; i--) {
+		p[i] = (1 & inum);
+		inum >>= 1;
+	}
+	p[size] = '\0';
+
+	for(int i=0; i<size; i++) {
+		printf("%d", p[i]);
+		if(((i+1) % 4) == 0)
+			printf(" ");
+	}
+	free(p);
+
+	int nPlus = 0;
+	if(argv[2][0] == '-')
+		nPlus = 1;
+
+	printf("\n");
+
+	fnum = atof(argv[2]);
+	bit_ptn(*((int*)&fnum));
+
+	return EXIT_SUCCESS;
+}
+
+void bit_ptn(int n) {
+	for(int i=31; i>=0; i--) {
+		printf("%d", (n & (1<<i))==0? 0: 1);
+		if(i != 0 && (i%4 == 0))
+			printf(" ");
+	}
+}
+/*
+ * 사용법을 출력한다.
+ */
+void print_usage()
+{
+	puts("[usage] print_bit.exe decimal float");
+}
+
+* answer #2
+#include <stdio.h>
+#include <stdlib.h>
+
+void bit_prn(int n) {
+    for (int i = 31; i >= 0; i--) {
+        printf("%d", ((n & (1 << i)) == 0) ? 0 : 1);
+        if ( i != 0 ) {
+            printf("%s", ((i % 4) == 0) ? " " : "");
+        }
+    }
+}
+
+int main(int argc, char * argv[]) {
+    int a;
+    float b;
+
+    if (argc > 1) {
+        a = atoi(argv[1]);
+    }
+
+    if (argc > 2) {
+        b = atof(argv[2]);
+    }
+
+    bit_prn(a);
+    printf(" : %d\n", a);
+
+    bit_prn(*((int*) &b));
+    printf(" : %f\n", b);
+
+    return 0;
+}
+
+* answer #3
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+void change_bit(int val) {
+    int i;
+    for (i=31; i >=0; i--) {
+        printf("%d", (val & (1 << i) ? 1 : 0));
+        if (i != 0)
+            printf("%s", ((i%4) == 0) ? " " : "");
+    }
+}
+
+int main(int argc, char** argv) {
+    int i,j;
+    char buf[30] = {0,};
+    int digit;
+    float fValue;
+
+    if (argc < 3) {
+        printf("usage : ./print_bit.exe 123 43.13 \n");
+        return 0;
+    }
+
+    digit = atoi(argv[1]);
+    fValue = atof(argv[2]);
+
+    change_bit(digit);
+    printf(" : %d\n", digit);
+    change_bit(*((int*) &fValue));
+    printf(" : %f\n", fValue);
+
+    return 0;
+}
+=======================================================================================
+프로그램 명: complete_graph 
+
+제한시간: 1 초 
+꼭지점(vertex)의 수 n 이 주어질 때 임의의 점에서 다른 점으로 바로 가는 길이 존재할 때 선의 수(edge) 을 구하는 것이 문제이다. 
+
+n 이 4 이면 6 개의 선이 존재한다. 
+
+입력
+n 이 주어진다. n 은 2 이상 1000 이하의 정수이다. 
+출력
+선의 수를 출력한다. 
+
+입출력 예
+입력
+4
+출력
+6
+* 이러한 그래프를 완전 그래프(complete graph)라 합니다. 
+
+/*
+ * complete_graph.c
+ *
+ *  Created on: 2017. 3. 20.
+ *      Author: 74903
+ */
+
+#include <stdio.h>
+
+void main() {
+	setbuf(stdout, NULL);
+	printf("점의 갯수를 입력하세요:");
+
+	int num=0;
+	scanf("%d", &num);
+
+	int nTotalLine = num*(num-1) /2;
+
+	printf("선의 갯수는 [%d]입니다.", nTotalLine);
+	return ;
+}
+
+	
+=======================================================================================
+주희는 심심해서 다음과 같이 수를 쓰기 시작 했다. 
+
+이렇게 수를 쓰는 경우 어떤 수가 몇 층에 있는지가 궁금해 졌다. 
+참고로 100 은 7 층에 존재 한다. 
+
+입력
+32 비트 정수 범위내의 값이 입력으로 주어진다. 
+출력
+층 수를 출력한다. 
+
+입출력 예
+입력
+100
+출력
+7
+♣n 개의 노드를 가지는 complete binary tree 의 depth 를 구하는 문제입니다. 
+
+* answer #1
+/*
+ * flr.c
+ *
+ *  Created on: 2017. 3. 20.
+ *      Author: 74903
+ */
+#include<stdio.h>
+
+void main()
+{
+	int num = 0;
+	fflush(stdin);
+
+	printf("숫자를 입력하세요:");
+	scanf("%d", &num);
+
+	int nFloor = 2;
+	int nStart = 0, nLast = 1;
+	int nDur = 1;
+
+	if(num < 0) {
+		printf("음수는 싫어요");
+		return;
+	}
+	else if(num == 1) {
+		printf("%d는 1층에 있습니다.", num);
+		return;
+	}
+	while(1) {
+		nDur *= 2;
+
+		nStart = nLast+1;
+		nLast = nStart+nDur -1;
+		printf("[%d]층, start[%d], last[%d], nDur[%d]\n", nFloor, nStart, nLast, nDur);
+		if((num >= nStart) && (num <= nLast))
+			break;
+
+		nFloor++;
+	}
+
+	printf("%d는 %d층에 있습니다.", num, nFloor);
+	return;
+}	
