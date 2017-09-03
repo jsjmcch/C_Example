@@ -422,9 +422,98 @@ for (int depth = 0; depth < 2; depth++)
     free(m[depth]);
 }
 ==================================================================================
-    
-==================================================================================
+* binarySearch
+#include <string.h>
+#include <stdlib.h>
 
+int binary_search(int *ptr, int size, int search);
+
+int main(int argc, char *argv[])
+{
+    int i,j;
+    int *ptr = NULL;
+    char buf[50] = {0,};
+    int searchNum  = 0;
+    int result;
+
+    ptr = (int *) malloc(sizeof(int)*argc);
+
+    printf("argc = %d\n", argc);
+
+    for(i=0; i<argc-1; i++) {
+        //printf("%d ", atoi(argv[i+1]));
+        ptr[i] = atoi(argv[i+1]);
+    }
+
+    printf("input search num : ");
+    scanf("%d", &searchNum);
+
+    result = binary_search(ptr, argc-1, searchNum);
+    if( result == -1 ) {
+        printf("searchNum is not found.\n");
+    } else {
+        printf("search index : %d\n", result);
+    }
+
+    return 0;
+}
+
+int binary_search(int *buf, int size, int sNum) {
+    int ret = -1;
+    int first = 0;
+    int last = size;
+    int middle = 0;
+
+    while( first <= last ) {
+        middle = (first+last) / 2;
+        if( sNum < buf[middle] ) { // left.
+            last = middle-1;
+        } else if ( sNum == buf[middle]) {
+            ret = middle;
+            break;
+        } else if( sNum > buf[middle]) {
+            first = middle+1;
+        }
+    }
+	return ret'
+}
+==================================================================================
+#include <stdio.h>
+
+int RecursiveBinSearch( int nArr[], int nBegin, int nEnd, int nTarget )
+{
+    int nMid = 0;
+
+    if( nBegin > nEnd ) return -1;
+
+    nMid = (nBegin + nEnd) / 2;
+
+    if( nArr[nMid] == nTarget ) return nMid;
+    else if( nTarget < nArr[nMid] )
+        return RecursiveBinSearch( nArr, nBegin, nMid-1, nTarget );
+    else
+        return RecursiveBinSearch( nArr, nMid+1, nEnd, nTarget );
+}
+
+int main()
+{
+    int nArr[] = { 1, 3, 5, 7, 9, 11, 13 };
+    int nResult;
+
+    nResult = RecursiveBinSearch( nArr, 0, sizeof(nArr)/sizeof(int)-1, 7 );
+
+    if( nResult == -1 )
+        printf("not found\n");
+    else {
+        for( int i=0; i<sizeof(nArr)/sizeof(int); ++i ) {
+            printf( "%d ", nArr[i] );
+        }
+        printf("\n%d번째 배열요소입니다.\n", nResult);
+
+    }
+
+    return 0;
+}
 ==================================================================================
     
 ==================================================================================
