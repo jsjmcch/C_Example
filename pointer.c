@@ -104,43 +104,6 @@ int main(void) {
     return 0;
 }
 ==============================================================================================
-#include <stdio.h>
-
-#if 0
-void swapIntPtr(int *p1, int *p2)
-{
-    int *tmp;
-    *tmp = *p1;
-    *p1 = *p2;
-    *p2 = *tmp;
-}
-#else
-void swapIntPtr_2(int **p1, int **p2)
-{
-    int *tmp;
-    tmp = *p1;
-    *p1 = *p2;
-    *p2 = tmp;
-}
-#endif
-
-int main(void) {
-    int num1=10, num2=20;
-    int *ptr1, *ptr2;
-
-    ptr1=&num1, ptr2=&num2;
-
-    printf("*ptr1, *ptr2: %d %d\n", *ptr1, *ptr2);
-
-    // 함수 호출 후 ptr1과 ptr2가 가리키는 값이 바뀌었는지 살펴본다.
-    //swapIntPtr(ptr1, ptr2);
-    //swapIntPtr(&num1, &num2);
-    swapIntPtr_2(&ptr1, &ptr2);
-
-    printf("*ptr1, *ptr2: %d %d\n", *ptr1, *ptr2);
-
-    return 0;
-}
 ==============================================================================================
 #include <stdio.h>
 #include <stdlib.h>
