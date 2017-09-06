@@ -142,6 +142,78 @@ int main(void) {
     return 0;
 }
 ==============================================================================================
+#include <stdio.h>
+#include <stdlib.h>
+
+#define ROW 3 //행의 길이
+#define COL 5 //열의 길이
+
+int** make_2dArray(int row, int col);
+void free_2dArray(int **arr, int row);
+
+int main() {
+	/*
+	 * 2차원 배열 처럼 활용 할 수 있도록 메모리를 할당 받아서
+	 * 주소를 이중 포인터에 저장한다.
+	 */
+    int **arr = make_2dArray(ROW, COL);
+
+    if(arr==NULL)
+    {
+    	puts("메모리 할당 실패\n");
+    	return 0;
+    }
+
+    /* 2차원 배열 처럼 활용한다. */
+	arr[0][0] = 6;
+    arr[1][1] = 3;
+    arr[2][3] = 2;
+
+    printf("%d\n", arr[0][0]);
+    printf("%d\n", arr[1][1]);
+    printf("%d\n", arr[2][3]);
+
+	/*
+	 * 메모리 leak이 일어나지 않게 메모리를 해제한다.
+	 */
+    free_2dArray(arr, ROW);
+
+    return 0;
+}
+
+/* 행의 길이(row), 열의 길이(col)를 입력 받아서
+ * 2차원 배열과 같이 활용 할 수 있도록 메모리를 할 당 한 후
+ * 메모리의 주소를 return 한다.
+ */
+int** make_2dArray(int row, int col)
+{
+	/* 행 길이*포인터크기 만큼 메모리를 할당 한다. */
+    int **td_arr = malloc(sizeof(int *) * row);
+
+    if(td_arr != NULL) {
+
+		/* 행 길이 만큼 반복 하면서 열 길이 만큼 메모리를 할당 한다. */
+		for (int i = 0; i<row; i++)
+		{
+			td_arr[i] = malloc(sizeof(int) * col);
+			if(td_arr[i]==NULL)
+				return NULL;
+		}
+    }
+    return td_arr;
+}
+
+/* 할당 받은 메모리를 해제한다.
+ */
+void free_2dArray(int **arr, int row)
+{
+	/* 행 길이 만큼 반복하면서 메모리를 해제한다 */
+    for (int i = 0; i < row; i++)
+        free(arr[i]);
+
+    /* 이중 포인터에 할당 된 메모리를 해제한다 */
+    free(arr);
+}
 
 ==============================================================================================
 
